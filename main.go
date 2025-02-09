@@ -1,12 +1,60 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+var cliCommands map[string]cliCommand
+
 func main() {
-	text := "Hello  World!"
 
-	cleanText := cleanInputString(text)
+	scanner := bufio.NewScanner(os.Stdin)
 
-	for _, word := range cleanText {
-		println(word)
+	cliCommands = map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exits Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Display commands",
+			callback:    commandHelp,
+		},
 	}
 
+	fmt.Println("Welcome to the Pokedex!")
+	fmt.Println("Commands:")
+
+	for _, command := range cliCommands {
+		fmt.Printf("%s: %s\n", command.name, command.description)
+	}
+
+	for {
+
+		fmt.Print("Pokedex > ")
+
+		// Wait for user input
+		if scanner.Scan() {
+
+			// Clean the input: lowercase, split into words
+			words := cleanInputString(scanner.Text())
+
+			// Print first word of the input, if it exists. Stop program on "exit"
+			if len(words) > 0 {
+				input := words[0]
+
+				command, ok := cliCommands[input]
+				if ok {
+					command.callback()
+				}
+
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Error reading input:", err)
+		}
+	}
 }
