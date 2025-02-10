@@ -42,6 +42,12 @@ func main() {
 			callback:    commandMapBack,
 			config:      &config{},
 		},
+		"explore": {
+			name:        "explore",
+			description: "Explore a location for Pokemon.",
+			callback:    commandExplore,
+			config:      &config{},
+		},
 	}
 
 	fmt.Println("####################\nWelcome to the Pokedex!")
@@ -72,7 +78,7 @@ func main() {
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			fmt.Println("Error reading input:", err)
+			fmt.Println("Error using scanner.")
 		}
 	}
 }

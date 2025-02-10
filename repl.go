@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Jarimus/pokedexcli/internal/pokedex"
 )
@@ -46,17 +48,17 @@ func commandHelp() error {
 
 func commandMap() error {
 
-	var locations pokedex.LocationArea
+	var locations pokedex.Locations
 	var err error
 
 	// Get the locations from the pokedex api. If the locations have been previously received, show the next 20 locations (config.Next)
 	if cliCommands["map"].config.Next == "" {
-		locations, err = pokedex.MapRequest("https://pokeapi.co/api/v2/location-area/", mapCache)
+		locations, err = pokedex.LocationsRequest("https://pokeapi.co/api/v2/location-area/", mapCache)
 		if err != nil {
 			return fmt.Errorf("mapreqest error: %v", err)
 		}
 	} else {
-		locations, err = pokedex.MapRequest(cliCommands["map"].config.Next, mapCache)
+		locations, err = pokedex.LocationsRequest(cliCommands["map"].config.Next, mapCache)
 		if err != nil {
 			return fmt.Errorf("mapreqest error: %v", err)
 		}
@@ -78,14 +80,14 @@ func commandMap() error {
 
 func commandMapBack() error {
 	previousLocations := cliCommands["map"].config.Prev
-	var locations pokedex.LocationArea
+	var locations pokedex.Locations
 	var err error
 
 	if previousLocations == "" {
 		fmt.Println("You are at the first page.")
 		return nil
 	} else {
-		locations, err = pokedex.MapRequest(previousLocations, mapCache)
+		locations, err = pokedex.LocationsRequest(previousLocations, mapCache)
 		if err != nil {
 			return fmt.Errorf("error: %v", err)
 		}
@@ -95,6 +97,42 @@ func commandMapBack() error {
 		for _, location := range locations.Results {
 			fmt.Println(location.Name)
 		}
+	}
+
+	return nil
+}
+
+func commandExplore() error {
+
+	// scanner to ask for further info: the name of the area.
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Printf("Which area would you like to explore?\nPokedex > ")
+	scanner.Scan()
+
+	input := cleanInputString(scanner.Text())
+
+	if len(input) == 0 {
+		return fmt.Errorf("empty input")
+	}
+
+	areaName := input[0]
+	area, err := pokedex.AreaRequest(areaName, mapCache)
+	if err != nil {
+		return fmt.Errorf("error: %w", err)
+	}
+
+	fmt.Printf("Exploring %s...\n", area.Name)
+	time.Sleep(time.Second)
+
+	if len(area.PokemonList) > 0 {
+		fmt.Printf("Found the following Pokemon:\n")
+		for _, pokemon := range area.PokemonList {
+			time.Sleep(150 * time.Millisecond)
+			fmt.Printf("- %s\n", pokemon.Pokemon.Name)
+		}
+
+	} else {
+		fmt.Println("No pokemon here")
 	}
 
 	return nil

@@ -1,7 +1,6 @@
 package pokecache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -58,7 +57,7 @@ func (c *Cache) reapLoop(interval time.Duration) {
 			if time.Since(entry.createdAt) > interval {
 				c.mu.Lock()
 				delete(c.entries, key)
-				fmt.Printf("Deleted entry at key %v\nPokedex >", key)
+				// For testing: fmt.Printf("Deleted entry at key %v\nPokedex >", key)
 				c.mu.Unlock()
 			}
 		}
