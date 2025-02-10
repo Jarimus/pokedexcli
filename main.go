@@ -17,11 +17,25 @@ func main() {
 			name:        "exit",
 			description: "Exits Pokedex",
 			callback:    commandExit,
+			config:      &config{},
 		},
 		"help": {
 			name:        "help",
 			description: "Display commands",
 			callback:    commandHelp,
+			config:      &config{},
+		},
+		"map": {
+			name:        "map",
+			description: "List the next 20 locations of the Pokemon World",
+			callback:    commandMap,
+			config:      &config{},
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "List the previous 20 locations of the Pokemon World",
+			callback:    commandMapBack,
+			config:      &config{},
 		},
 	}
 
