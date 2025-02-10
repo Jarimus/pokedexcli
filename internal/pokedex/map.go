@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/Jarimus/pokedexcli/internal/pokecache"
 )
 
 type LocationArea struct {
@@ -17,19 +19,32 @@ type LocationArea struct {
 	} `json:"results"`
 }
 
-func MapRequest(url string) (LocationArea, error) {
+func MapRequest(url string, cache pokecache.Cache) (LocationArea, error) {
 
-	resp, err := http.Get(url)
-	if err != nil {
-		return LocationArea{}, fmt.Errorf("error getting map: %v", err)
+	var body []byte
+	var err error
+
+	// First look for the url in the cache
+	body, ok := cache.Get(url)
+
+	// If the data is not cached, initiate GET.
+	if !ok {
+		// Get locations from the pokedex api
+		resp, err := http.Get(url)
+		if err != nil {
+			return LocationArea{}, fmt.Errorf("error getting map: %v", err)
+		}
+
+		// read and store in memory the response body.
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return LocationArea{}, fmt.Errorf("error: %v", err)
+		}
+		defer resp.Body.Close()
+
+		// store the response in the cache
+		cache.Add(url, body)
 	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return LocationArea{}, fmt.Errorf("error: %v", err)
-	}
-
-	defer resp.Body.Close()
 
 	var locations LocationArea
 

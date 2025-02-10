@@ -36,9 +36,11 @@ func commandExit() error {
 }
 
 func commandHelp() error {
+	fmt.Println("####################\nCommands:")
 	for _, command := range cliCommands {
 		fmt.Printf("%s: %s\n", command.name, command.description)
 	}
+	fmt.Println("####################")
 	return nil
 }
 
@@ -49,12 +51,12 @@ func commandMap() error {
 
 	// Get the locations from the pokedex api. If the locations have been previously received, show the next 20 locations (config.Next)
 	if cliCommands["map"].config.Next == "" {
-		locations, err = pokedex.MapRequest("https://pokeapi.co/api/v2/location-area/")
+		locations, err = pokedex.MapRequest("https://pokeapi.co/api/v2/location-area/", mapCache)
 		if err != nil {
 			return fmt.Errorf("mapreqest error: %v", err)
 		}
 	} else {
-		locations, err = pokedex.MapRequest(cliCommands["map"].config.Next)
+		locations, err = pokedex.MapRequest(cliCommands["map"].config.Next, mapCache)
 		if err != nil {
 			return fmt.Errorf("mapreqest error: %v", err)
 		}
@@ -63,9 +65,13 @@ func commandMap() error {
 	cliCommands["map"].config.Prev = locations.Previous
 	cliCommands["map"].config.Next = locations.Next
 
+	fmt.Println("####################")
+
 	for _, location := range locations.Results {
 		fmt.Println(location.Name)
 	}
+
+	fmt.Println("####################")
 
 	return nil
 }
@@ -79,7 +85,7 @@ func commandMapBack() error {
 		fmt.Println("You are at the first page.")
 		return nil
 	} else {
-		locations, err = pokedex.MapRequest(previousLocations)
+		locations, err = pokedex.MapRequest(previousLocations, mapCache)
 		if err != nil {
 			return fmt.Errorf("error: %v", err)
 		}

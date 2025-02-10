@@ -4,9 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/Jarimus/pokedexcli/internal/pokecache"
 )
 
+// Initiate global variables
 var cliCommands map[string]cliCommand
+var mapCache = pokecache.NewCache(5 * time.Second)
 
 func main() {
 
@@ -39,12 +44,9 @@ func main() {
 		},
 	}
 
-	fmt.Println("Welcome to the Pokedex!")
-	fmt.Println("Commands:")
+	fmt.Println("####################\nWelcome to the Pokedex!")
 
-	for _, command := range cliCommands {
-		fmt.Printf("%s: %s\n", command.name, command.description)
-	}
+	commandHelp()
 
 	for {
 
@@ -63,6 +65,8 @@ func main() {
 				command, ok := cliCommands[input]
 				if ok {
 					command.callback()
+				} else {
+					fmt.Printf("####################\nInvalid command\n####################\n")
 				}
 
 			}
