@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -211,13 +212,13 @@ func commandCatch(target_pokemon string) error {
 	// base exp 0 - 255, normalize to 0 - 100. Random number from 1 - 100 must be equal to or higher than base exp.
 
 	// Set up a list of pokemon names user has caught to compare the target pokemon to
-	var ourPokemonNames []string
-	for _, pokemon := range OurPokemon {
-		ourPokemonNames = append(ourPokemonNames, pokemon.Name)
+	var PokemonCaughtNames []string
+	for _, pokemon := range PokemonCaught {
+		PokemonCaughtNames = append(PokemonCaughtNames, pokemon.Name)
 	}
 
 	// Compare target and user's pokemon. Return if already caught.
-	if slices.Contains(ourPokemonNames, target_pokemon) {
+	if slices.Contains(PokemonCaughtNames, target_pokemon) {
 		fmt.Printf("You have already caught a %s\n", target_pokemon)
 		return nil
 	}
@@ -230,7 +231,7 @@ func commandCatch(target_pokemon string) error {
 
 	// Try to catch the pokemon
 	targetValue := pokemon.BaseExperience * 100 / 255
-	ourBonus := len(OurPokemon)
+	ourBonus := len(PokemonCaught)
 	ourRoll := (rand.Intn(100) + 1) + ourBonus // Random number from 1 - 100, +1/pokemon caught
 	successChance := float64(100 - (targetValue - ourBonus))
 
@@ -240,7 +241,7 @@ func commandCatch(target_pokemon string) error {
 
 	if ourRoll >= targetValue {
 		fmt.Printf("%s was caught!\n", pokemon.Name)
-		OurPokemon = append(OurPokemon, pokemon)
+		PokemonCaught = append(PokemonCaught, pokemon)
 	} else {
 		fmt.Printf("%s escaped!\n", pokemon.Name)
 	}
@@ -250,7 +251,7 @@ func commandCatch(target_pokemon string) error {
 
 func commandInspect(target_pokemon string) error {
 
-	for _, pokemon := range OurPokemon {
+	for _, pokemon := range PokemonCaught {
 		if pokemon.Name == target_pokemon {
 			fmt.Printf("Name: %s\n", pokemon.Name)
 			time.Sleep(100 * time.Millisecond)
@@ -282,14 +283,14 @@ func commandInspect(target_pokemon string) error {
 
 func commandPokedex(string) error {
 
-	if len(OurPokemon) == 0 {
+	if len(PokemonCaught) == 0 {
 		println("You have not caught any Pokemon.")
 		return nil
 	}
 
 	println("Your Pokedex:")
 
-	for _, pokemon := range OurPokemon {
+	for _, pokemon := range PokemonCaught {
 		time.Sleep(100 * time.Millisecond)
 		fmt.Printf("\t- %s\n", pokemon.Name)
 	}
@@ -298,11 +299,37 @@ func commandPokedex(string) error {
 }
 
 func commandSave(string) error {
-	fmt.Println("Not implemented")
-	return nil
+
+	if len(PokemonCaught) == 0 {
+		println("No Pokemon caught. Save aborted.")
+		return nil
+	}
+
+	fileData, err := json.Marshal(PokemonCaught)
+	if err != nil {
+		return fmt.Errorf("error building json from the list of Pokemon structs: %w", err)
+	}
+
+	println("Caught Pokemon saved successfully to 'PokemonCaught.json'.")
+
+	return os.WriteFile("PokemonCaught.json", fileData, 0644)
+
 }
 
 func commandLoad(string) error {
-	fmt.Println("Not implemented")
+	data, err := os.ReadFile("PokemonCaught.json")
+	if err != nil {
+		println("Error loading data: ", err)
+		return err
+	}
+	err = json.Unmarshal(data, &PokemonCaught)
+	if err != nil {
+		println("Error decoding 'PokemonCaught.json': ", err)
+		return err
+	}
+
+	println("Save file 'PokemonCaught.json' loaded successfully!")
+	println("Number of Pokemon caught: ", len(PokemonCaught))
+
 	return nil
 }

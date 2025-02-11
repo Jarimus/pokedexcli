@@ -13,7 +13,7 @@ import (
 // Initiate global variables
 var cliCommands map[string]cliCommand
 var Cache = pokecache.NewCache(5 * time.Second)
-var OurPokemon []pokedex.Pokemon
+var PokemonCaught []pokedex.Pokemon
 
 func main() {
 
