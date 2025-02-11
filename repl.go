@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -26,18 +25,18 @@ type config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(string) error
 	config      *config
 }
 
 // Command functions
-func commandExit() error {
+func commandExit(string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(string) error {
 	fmt.Println("####################\nCommands:")
 	for _, command := range cliCommands {
 		fmt.Printf("%s: %s\n", command.name, command.description)
@@ -46,7 +45,7 @@ func commandHelp() error {
 	return nil
 }
 
-func commandMap() error {
+func commandMap(string) error {
 
 	var locations pokedex.Locations
 	var err error
@@ -78,7 +77,7 @@ func commandMap() error {
 	return nil
 }
 
-func commandMapBack() error {
+func commandMapBack(string) error {
 	previousLocations := cliCommands["map"].config.Prev
 	var locations pokedex.Locations
 	var err error
@@ -102,22 +101,16 @@ func commandMapBack() error {
 	return nil
 }
 
-func commandExplore() error {
+func commandExplore(areaName string) error {
 
-	// scanner to ask for further info: the name of the area.
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Printf("Which area would you like to explore?\nPokedex > ")
-	scanner.Scan()
-
-	input := cleanInputString(scanner.Text())
-
-	if len(input) == 0 {
-		return fmt.Errorf("empty input")
+	if areaName == "" {
+		println("Please give an area to explore as an argument.")
+		return fmt.Errorf("no argument")
 	}
 
-	areaName := input[0]
 	area, err := pokedex.AreaRequest(areaName, mapCache)
 	if err != nil {
+		println("Area not found.")
 		return fmt.Errorf("error: %w", err)
 	}
 

@@ -52,7 +52,7 @@ func main() {
 
 	fmt.Println("####################\nWelcome to the Pokedex!")
 
-	commandHelp()
+	commandHelp("")
 
 	for {
 
@@ -64,13 +64,19 @@ func main() {
 			// Clean the input: lowercase, split into words
 			words := cleanInputString(scanner.Text())
 
-			// Print first word of the input, if it exists. Stop program on "exit"
+			// Parse the command and they argument, if they exist.
 			if len(words) > 0 {
-				input := words[0]
+				com := words[0]
 
-				command, ok := cliCommands[input]
+				command, ok := cliCommands[com]
+
+				var arg string
+				if len(words) >= 2 {
+					arg = words[1]
+				}
+
 				if ok {
-					command.callback()
+					command.callback(arg)
 				} else {
 					fmt.Printf("####################\nInvalid command\n####################\n")
 				}
