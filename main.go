@@ -23,6 +23,8 @@ func main() {
 
 	fmt.Println("####################\nWelcome to the Pokedex!")
 
+	time.Sleep(2 * time.Second)
+
 	commandHelp("")
 
 	for {

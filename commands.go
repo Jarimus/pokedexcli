@@ -36,39 +36,62 @@ func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
 			name:        "exit",
-			description: "Exits Pokedex",
+			description: "\nExit Pokedex.",
 			callback:    commandExit,
 			config:      &config{},
 		},
 		"help": {
 			name:        "help",
-			description: "Display commands",
+			description: "\nDisplay commands.",
 			callback:    commandHelp,
 			config:      &config{},
 		},
 		"map": {
 			name:        "map",
-			description: "List the next 20 locations of the Pokemon World",
+			description: "\nList the next 20 locations of the Pokemon World.",
 			callback:    commandMap,
 			config:      &config{},
 		},
 		"mapb": {
 			name:        "mapb",
-			description: "List the previous 20 locations of the Pokemon World",
+			description: "\nList the previous 20 locations of the Pokemon World.",
 			callback:    commandMapBack,
 			config:      &config{},
 		},
 		"explore": {
 			name:        "explore",
-			description: "Explore a location for Pokemon.",
+			description: "\nExplore <location_name>\nExplore an area to find Pokemon.",
 			callback:    commandExplore,
 			config:      &config{},
 		},
 		"catch": {
 			name:        "catch",
-			description: "catch <pokemon_name>",
+			description: "\nCatch <pokemon_name>\nAttempt to catch a Pokemon.\nSuccess chance increases for every Pokemon you have caught.",
 			callback:    commandCatch,
 			config:      &config{},
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "\nInspect the statistics of a Pokemon you have caught.",
+			callback:    commandInspect,
+			config:      &config{},
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "\nList the Pokemmon you have caught.",
+			callback:    commandPokedex,
+			config:      &config{},
+		},
+		"save": {
+			name:        "save",
+			description: "\nSave into a file the Pokemon you have caught.",
+			callback:    commandSave,
+			config:      &config{},
+		},
+		"load": {
+			name:        "load",
+			description: "\nLoad from a file the Pokemon you have caught.",
+			callback:    commandLoad,
 		},
 	}
 }
@@ -81,8 +104,11 @@ func commandExit(string) error {
 
 func commandHelp(string) error {
 	fmt.Println("####################\nCommands:")
+	fmt.Println()
 	for _, command := range cliCommands {
 		fmt.Printf("%s: %s\n", command.name, command.description)
+		fmt.Println()
+		time.Sleep(100 * time.Millisecond)
 	}
 	fmt.Println("####################")
 	return nil
@@ -112,6 +138,7 @@ func commandMap(string) error {
 	fmt.Println("####################")
 
 	for _, location := range locations.Results {
+		time.Sleep(50 * time.Millisecond)
 		fmt.Println(location.Name)
 	}
 
@@ -136,9 +163,15 @@ func commandMapBack(string) error {
 		cliCommands["map"].config.Prev = locations.Previous
 		cliCommands["map"].config.Next = locations.Next
 
+		fmt.Println("####################")
+
 		for _, location := range locations.Results {
+			time.Sleep(50 * time.Millisecond)
 			fmt.Println(location.Name)
 		}
+
+		fmt.Println("####################")
+
 	}
 
 	return nil
@@ -212,5 +245,64 @@ func commandCatch(target_pokemon string) error {
 		fmt.Printf("%s escaped!\n", pokemon.Name)
 	}
 
+	return nil
+}
+
+func commandInspect(target_pokemon string) error {
+
+	for _, pokemon := range OurPokemon {
+		if pokemon.Name == target_pokemon {
+			fmt.Printf("Name: %s\n", pokemon.Name)
+			time.Sleep(100 * time.Millisecond)
+			fmt.Printf("Height: %d\n", pokemon.Height)
+			time.Sleep(100 * time.Millisecond)
+			fmt.Printf("Weight: %d\n", pokemon.Weight)
+			time.Sleep(100 * time.Millisecond)
+
+			fmt.Printf("Stats:\n")
+			for _, stat := range pokemon.Stats {
+				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("\t- %s: %d\n", stat.Stat.Name, stat.BaseStat)
+			}
+
+			fmt.Printf("Types:\n")
+			for _, t := range pokemon.Types {
+				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("\t- %s\n", t.Type.Name)
+			}
+
+			return nil
+		}
+	}
+
+	fmt.Println("You have not caught that pokemon.")
+
+	return nil
+}
+
+func commandPokedex(string) error {
+
+	if len(OurPokemon) == 0 {
+		println("You have not caught any Pokemon.")
+		return nil
+	}
+
+	println("Your Pokedex:")
+
+	for _, pokemon := range OurPokemon {
+		time.Sleep(100 * time.Millisecond)
+		fmt.Printf("\t- %s\n", pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandSave(string) error {
+	fmt.Println("Not implemented")
+	return nil
+}
+
+func commandLoad(string) error {
+	fmt.Println("Not implemented")
 	return nil
 }
