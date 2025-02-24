@@ -17,3 +17,5 @@ Here are some features that I might implement if I ever have the time to do it:
 - Travel with a party of Pokemon
 - Evolving Pokemon?
 - Limit travel to make it more interesting.
+
+![PokedexCLI image](pokedexCLI.png)
